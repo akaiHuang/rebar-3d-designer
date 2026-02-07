@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鋼筋配筋繪製系統 - Rebar Drawing Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', 'Arial', sans-serif;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+        
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        /* 頂部工具欄 */
+        #toolbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #2c3e50;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        #toolbar h1 {
+            color: #ecf0f1;
+            font-size: 20px;
+            margin-right: 30px;
+        }
+        
+        .toolbar-section {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            padding-right: 20px;
+            border-right: 1px solid #34495e;
+        }
+        
+        .toolbar-section:last-child {
+            border-right: none;
+        }
+        
+        .toolbar-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+        
+        .toolbar-btn:hover {
+            background: #2980b9;
+        }
+        
+        .toolbar-btn.active {
+            background: #e74c3c;
+        }
+        
+        /* 左側工具面板 */
+        #left-panel {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 280px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        
+        .panel-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+        
+        .panel-section h3 {
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .control-item {
+            margin-bottom: 12px;
+        }
+        
+        .control-item label {
+            display: block;
+            color: #34495e;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .control-item input[type="number"],
+        .control-item select {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .control-item input[type="color"] {
+            width: 100%;
+            height: 35px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .rebar-type-btn {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .rebar-type-btn:hover {
+            background: #d5dbdb;
+        }
+        
+        .rebar-type-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        /* 右側屬性面板 */
+        #right-panel {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 300px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        
+        .rebar-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .rebar-item {
+            background: #ecf0f1;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .rebar-item:hover {
+            background: #d5dbdb;
+        }
+        
+        .rebar-item.selected {
+            background: #3498db;
+            color: white;
+        }
+        
+        .rebar-item-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .rebar-item-info {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+        
+        /* 底部狀態欄 */
+        #status-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #34495e;
+            color: #ecf0f1;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+        
+        .status-item {
+            margin-right: 20px;
+        }
+        
+        /* 對話框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .modal-buttons button {
+            padding: 8px 20px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 工具欄 -->
+    <div id="toolbar">
+        <h1>🏗️ 鋼筋配筋繪製系統</h1>
+        
+        <div class="toolbar-section">
+            <button class="toolbar-btn" id="newProject">新建專案</button>
+            <button class="toolbar-btn" id="importDXF">匯入 DXF</button>
+            <button class="toolbar-btn" id="importDWG">匯入 DWG</button>
+            <button class="toolbar-btn" id="saveProject">儲存</button>
+            <button class="toolbar-btn" id="loadProject">載入</button>
+        </div>
+        
+        <div class="toolbar-section">
+            <button class="toolbar-btn" id="exportDXF">匯出 DXF</button>
+            <button class="toolbar-btn" id="exportPDF">匯出 PDF</button>
+            <button class="toolbar-btn" id="exportImage">匯出圖片</button>
+        </div>
+        
+        <div class="toolbar-section">
+            <button class="toolbar-btn" id="undoBtn">復原</button>
+            <button class="toolbar-btn" id="redoBtn">重做</button>
+            <button class="toolbar-btn" id="deleteBtn">刪除</button>
+        </div>
+        
+        <div class="toolbar-section">
+            <button class="toolbar-btn" id="viewTop">俯視圖</button>
+            <button class="toolbar-btn" id="viewFront">正視圖</button>
+            <button class="toolbar-btn" id="view3D">3D視圖</button>
+        </div>
+    </div>
+    
+    <!-- 左側工具面板 -->
+    <div id="left-panel">
+        <div class="panel-section">
+            <h3>建築模型控制</h3>
+            <div class="control-item">
+                <label>整體樓高 (mm): <span id="buildingHeightValue">3000</span></label>
+                <input type="range" id="buildingHeight" min="100" max="6000" step="100" value="3000">
+            </div>
+            
+            <div class="control-item">
+                <label>選中元素高度 (mm): <span id="elementHeightValue">-</span></label>
+                <input type="range" id="elementHeight" min="100" max="6000" step="100" value="3000" disabled>
+            </div>
+            
+            <div class="control-item">
+                <label>
+                    <input type="checkbox" id="show2DPlan" checked> 顯示 2D 平面圖
+                </label>
+            </div>
+            
+            <button class="rebar-type-btn" id="applyHeightToAll">套用高度到全部</button>
+        </div>
+        
+        <div class="panel-section">
+            <h3>鋼筋類型</h3>
+            <button class="rebar-type-btn active" data-type="straight">直鋼筋</button>
+            <button class="rebar-type-btn" data-type="stirrup">箍筋</button>
+            <button class="rebar-type-btn" data-type="bent">彎鉤鋼筋</button>
+            <button class="rebar-type-btn" data-type="spiral">螺旋筋</button>
+            <button class="rebar-type-btn" data-type="mesh">鋼筋網</button>
+        </div>
+        
+        <div class="panel-section">
+            <h3>鋼筋規格</h3>
+            <div class="control-item">
+                <label>鋼筋號數 (公稱直徑)</label>
+                <select id="rebarSize">
+                    <option value="10">D10 (10mm)</option>
+                    <option value="13">D13 (12.7mm)</option>
+                    <option value="16" selected>D16 (15.9mm)</option>
+                    <option value="19">D19 (19.1mm)</option>
+                    <option value="22">D22 (22.2mm)</option>
+                    <option value="25">D25 (25.4mm)</option>
+                    <option value="29">D29 (28.6mm)</option>
+                    <option value="32">D32 (32.3mm)</option>
+                    <option value="36">D36 (35.8mm)</option>
+                </select>
+            </div>
+            
+            <div class="control-item">
+                <label>鋼筋材質</label>
+                <select id="rebarGrade">
+                    <option value="SD280">SD280 (2800 kgf/cm²)</option>
+                    <option value="SD420" selected>SD420 (4200 kgf/cm²)</option>
+                    <option value="SD490">SD490 (4900 kgf/cm²)</option>
+                </select>
+            </div>
+            
+            <div class="control-item">
+                <label>長度 (mm)</label>
+                <input type="number" id="rebarLength" value="3000" step="10">
+            </div>
+            
+            <div class="control-item">
+                <label>間距 (mm)</label>
+                <input type="number" id="rebarSpacing" value="150" step="10">
+            </div>
+            
+            <div class="control-item">
+                <label>數量</label>
+                <input type="number" id="rebarCount" value="10" min="1">
+            </div>
+        </div>
+        
+        <div class="panel-section">
+            <h3>保護層</h3>
+            <div class="control-item">
+                <label>保護層厚度 (mm)</label>
+                <input type="number" id="coverThickness" value="40" step="5">
+            </div>
+        </div>
+        
+        <div class="panel-section">
+            <h3>顯示設定</h3>
+            <div class="control-item">
+                <label>鋼筋顏色</label>
+                <input type="color" id="rebarColor" value="#ff6b6b">
+            </div>
+            
+            <div class="control-item">
+                <label>
+                    <input type="checkbox" id="showDimensions" checked> 顯示標註
+                </label>
+            </div>
+            
+            <div class="control-item">
+                <label>
+                    <input type="checkbox" id="showGrid" checked> 顯示網格
+                </label>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 右側屬性面板 -->
+    <div id="right-panel">
+        <h3>鋼筋清單</h3>
+        <div class="rebar-list" id="rebarList">
+            <!-- 動態生成 -->
+        </div>
+        
+        <div class="panel-section">
+            <h3>統計資訊</h3>
+            <div style="font-size: 12px; line-height: 1.8;">
+                <div>總鋼筋數: <strong id="totalCount">0</strong> 支</div>
+                <div>總長度: <strong id="totalLength">0</strong> m</div>
+                <div>總重量: <strong id="totalWeight">0</strong> kg</div>
+                <div>混凝土體積: <strong id="concreteVolume">0</strong> m³</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 3D 畫布 -->
+    <div id="canvas-container"></div>
+    
+    <!-- 底部狀態欄 -->
+    <div id="status-bar">
+        <div>
+            <span class="status-item">座標: X=<span id="mouseX">0</span>, Y=<span id="mouseY">0</span>, Z=<span id="mouseZ">0</span></span>
+            <span class="status-item">視圖: <span id="currentView">3D視圖</span></span>
+        </div>
+        <div>
+            <span class="status-item">專案: <span id="projectName">未命名專案</span></span>
+            <span class="status-item">建築: <span id="buildingInfo">未匯入</span></span>
+            <span class="status-item" id="saveStatus">未儲存</span>
+        </div>
+    </div>
+
+    <!-- 匯入檔案對話框 -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <h2>匯入 CAD 圖檔</h2>
+            <p>請選擇 DXF 或 DWG 檔案（建議使用 DXF 格式）</p>
+            
+            <div class="control-item">
+                <label>選擇檔案</label>
+                <input type="file" id="fileInput" accept=".dxf,.dwg" style="width: 100%; padding: 10px;">
+            </div>
+            
+            <div class="control-item">
+                <label>樓層高度 (mm)</label>
+                <input type="number" id="importFloorHeight" value="3000" step="100">
+            </div>
+            
+            <div class="control-item">
+                <label>牆體厚度 (mm)</label>
+                <input type="number" id="importWallThickness" value="200" step="10">
+            </div>
+            
+            <div class="control-item">
+                <label>樓板厚度 (mm)</label>
+                <input type="number" id="importSlabThickness" value="200" step="10">
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn-secondary" id="cancelImport">取消</button>
+                <button class="btn-primary" id="confirmImport">確定匯入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隱藏的檔案輸入 -->
+    <input type="file" id="hiddenFileInput" accept=".dxf,.dwg" style="display: none;">
+
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <script type="module" src="rebar-drawing.js"></script>
+</body>
+</html>

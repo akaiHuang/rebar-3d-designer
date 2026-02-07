@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速入門 - 鋼筋配筋繪製系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            line-height: 1.8;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 36px;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .feature-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .step {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .step:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.3s;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%);
+        }
+        
+        .center {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        ul {
+            margin-left: 30px;
+        }
+        
+        li {
+            margin: 10px 0;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            color: #e74c3c;
+        }
+        
+        .workflow {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        
+        .workflow-item {
+            flex: 1;
+            min-width: 200px;
+            margin: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .workflow-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ 鋼筋配筋繪製系統</h1>
+        <h2 style="text-align: center; color: #666; margin-bottom: 30px;">專業 3D 鋼筋配置工具</h2>
+        
+        <div class="highlight">
+            <h2 style="margin-bottom: 15px;">🎯 核心功能</h2>
+            <p><strong>全新功能！</strong> 現在支援匯入 AutoCAD DXF/DWG 圖檔，自動將 2D 平面圖轉換為 3D 建築模型，然後在模型上配置鋼筋。</p>
+        </div>
+        
+        <h2 style="margin-top: 40px; color: #2c3e50;">推薦工作流程</h2>
+        
+        <div class="workflow">
+            <div class="workflow-item">
+                <div class="workflow-icon">📐</div>
+                <h3>1. 準備 CAD 圖</h3>
+                <p>在 AutoCAD 中繪製平面圖和剖面圖</p>
+            </div>
+            
+            <div class="workflow-item">
+                <div class="workflow-icon">📥</div>
+                <h3>2. 匯入系統</h3>
+                <p>匯入 DXF 檔案自動建立 3D 模型</p>
+            </div>
+            
+            <div class="workflow-item">
+                <div class="workflow-icon">🔧</div>
+                <h3>3. 配置鋼筋</h3>
+                <p>在 3D 模型上添加鋼筋</p>
+            </div>
+            
+            <div class="workflow-item">
+                <div class="workflow-icon">💾</div>
+                <h3>4. 匯出結果</h3>
+                <p>儲存專案或匯出圖片</p>
+            </div>
+        </div>
+        
+        <div class="feature-box">
+            <h3>🎨 支援的鋼筋類型</h3>
+            <ul>
+                <li><strong>直鋼筋</strong>：梁、柱、板的主筋</li>
+                <li><strong>箍筋</strong>：矩形箍筋，用於梁柱約束</li>
+                <li><strong>彎鉤鋼筋</strong>：帶彎鉤的主筋，增強錨固</li>
+                <li><strong>螺旋筋</strong>：圓形柱的螺旋箍筋</li>
+                <li><strong>鋼筋網</strong>：雙向鋼筋網片，用於樓板</li>
+            </ul>
+        </div>
+        
+        <h2 style="margin-top: 40px; color: #2c3e50;">快速開始步驟</h2>
+        
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>開啟主程式</strong>
+            <p>在瀏覽器中開啟 <code>index.html</code> 檔案</p>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>匯入 CAD 圖檔（推薦）</strong>
+            <p>點擊工具欄的「匯入 DXF」按鈕，選擇您的 AutoCAD DXF 檔案</p>
+            <ul>
+                <li>可以使用附帶的 <code>example.dxf</code> 測試</li>
+                <li>系統會自動識別牆體、柱子並生成 3D 模型</li>
+                <li>可設定樓層高度、牆體厚度、樓板厚度</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>檢查 3D 模型</strong>
+            <p>使用滑鼠控制 3D 視角：</p>
+            <ul>
+                <li>左鍵拖曳：旋轉視角</li>
+                <li>右鍵拖曳：平移視圖</li>
+                <li>滾輪：縮放</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>配置鋼筋</strong>
+            <p>使用左側面板配置鋼筋：</p>
+            <ul>
+                <li>選擇鋼筋類型（直鋼筋、箍筋等）</li>
+                <li>設定規格（D10 ~ D36）</li>
+                <li>設定長度、間距、數量</li>
+                <li>雙擊空白處或按 <code>A</code> 鍵添加</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">5</span>
+            <strong>查看統計資訊</strong>
+            <p>右側面板顯示：</p>
+            <ul>
+                <li>鋼筋清單</li>
+                <li>總數量、總長度</li>
+                <li>總重量計算</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <span class="step-number">6</span>
+            <strong>儲存與匯出</strong>
+            <ul>
+                <li><strong>儲存專案</strong>：保存為 JSON 格式，可重新載入</li>
+                <li><strong>匯出圖片</strong>：匯出當前 3D 視圖為 PNG</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h3>📋 CAD 圖檔準備建議</h3>
+            <p><strong>圖層命名建議：</strong></p>
+            <ul>
+                <li><code>WALL</code>：牆體線條</li>
+                <li><code>COLUMN</code>：柱子（圓形或矩形）</li>
+                <li><code>BEAM</code>：樑的位置</li>
+                <li><code>SECTION</code>：剖面圖資訊</li>
+            </ul>
+            <p><strong>繪圖要求：</strong></p>
+            <ul>
+                <li>牆體使用 LINE 或 POLYLINE 繪製</li>
+                <li>圓柱使用 CIRCLE，方柱使用矩形 POLYLINE</li>
+                <li>建議使用實際尺寸（單位：mm）</li>
+                <li>建議在 AutoCAD 中另存為 R2010 DXF 格式以獲得最佳兼容性</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h3>⌨️ 鍵盤快捷鍵</h3>
+            <ul>
+                <li><code>A</code>：添加鋼筋</li>
+                <li><code>Delete</code>：刪除選中的鋼筋</li>
+                <li>滑鼠點擊：選擇鋼筋</li>
+                <li>雙擊空白處：快速添加鋼筋</li>
+            </ul>
+        </div>
+        
+        <div class="feature-box">
+            <h3>🔧 技術規格</h3>
+            <ul>
+                <li><strong>鋼筋規格</strong>：D10 ~ D36（符合 CNS 規範）</li>
+                <li><strong>鋼筋材質</strong>：SD280 / SD420 / SD490</li>
+                <li><strong>單位系統</strong>：長度 mm、重量 kg</li>
+                <li><strong>瀏覽器要求</strong>：Chrome 90+ / Firefox 88+ / Edge 90+（需支援 WebGL）</li>
+            </ul>
+        </div>
+        
+        <div class="center">
+            <h2 style="margin-bottom: 20px; color: #2c3e50;">開始使用</h2>
+            <a href="index.html" class="btn">🚀 啟動主程式</a>
+            <a href="DWG_IMPORT_GUIDE.md" class="btn btn-secondary">📖 詳細使用指南</a>
+        </div>
+        
+        <div class="highlight" style="margin-top: 40px;">
+            <h3>💡 小提示</h3>
+            <ul>
+                <li>首次使用建議先匯入 <code>example.dxf</code> 熟悉功能</li>
+                <li>DWG 檔案需要先在 AutoCAD 中另存為 DXF 格式</li>
+                <li>配置鋼筋時可以點擊右側清單選擇已添加的鋼筋</li>
+                <li>使用「俯視圖」、「正視圖」、「3D視圖」按鈕快速切換視角</li>
+                <li>定期點擊「儲存」按鈕備份您的工作</li>
+            </ul>
+        </div>
+        
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0; text-align: center; color: #666;">
+            <p>鋼筋配筋繪製系統 v2.0 | 使用 Three.js 開發</p>
+            <p style="font-size: 12px; margin-top: 10px;">⚠️ 本軟體僅供參考使用，實際施工請遵循當地建築法規並由專業結構技師審核。</p>
+        </div>
+    </div>
+</body>
+</html>
